@@ -1,9 +1,20 @@
+import pickle 
 import constants
 from input_parser import parse_cmd
 from phone_book import AddressBook, Record, Birthday, Phone
 
-# phone_book = {}
-book = AddressBook()
+def save_data(book, filename='addressbook.pkl'):
+    with open(filename, 'wb') as file:
+        pickle.dump(book, file)
+
+def load_data(filename='addressbook.pkl'):
+    try:
+        with open(filename, 'rb') as file:
+            return pickle.load(file)
+    except FileNotFoundError:
+        return AddressBook()        # if file not found return a new AddressBook
+
+book = load_data()
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -19,7 +30,7 @@ def input_error(func):
 def main():
     '''
     The main function which controls the main command processing loop.
-    '''   
+    '''
 
     print('"How can I help you?\n"')
     print(constants.MENU)
@@ -50,6 +61,7 @@ def main():
             case 'birthdays':
                 print(f'{birthdays()}\n')     
             case 'exit':
+                save_data(book)
                 print('Good bye!')
                 break
             case _:
@@ -73,8 +85,6 @@ def change_contact(name, old_phone, phone_to_update):
         return "contact updated"
     else:
         raise ValueError("no such phone for contact")
-    
-        
 
 @input_error
 def show_phone(name):
@@ -82,7 +92,6 @@ def show_phone(name):
     if not existing:
         raise ValueError("no such contact")
     return f"Phones: {'; '.join(p.value for p in existing.phones)}"
-
 
 def show_all():
     return f"All book: {book}"
@@ -106,8 +115,8 @@ def show_birthday(name):
 def birthdays():
     # If no birthday
     return book.get_upcoming_birthdays()
-    
-    
+   
+
 if __name__ == "main":
     print('Hello')
     main()
